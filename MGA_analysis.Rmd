@@ -15,26 +15,47 @@ library(janitor)
 
 senate_candidates <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/2026_GP_statesenatorbydistrict_candidatelist.csv") |> clean_names()
 
-senate_candidates_count <- senate_candidates |> 
+senate_candidates_count <- senate_candidates |> filter(candidate_status == "Active") |> 
   mutate(senate_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
   arrange(senate_district) |> count(senate_district) |> rename(num_candidates = n)
 
 write.csv(senate_candidates_count, file ="senate_candidates_count.csv") 
+
+
+#party totals
+
+senate_party_count <- senate_candidates |> filter(candidate_status == "Active") |> 
+  mutate(senate_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
+  arrange(senate_district) |> count(senate_district, office_political_party) |>
+  pivot_wider(
+    names_from = office_political_party,
+    values_from = n,
+    values_fill = 0
+  ) 
 
 ```
 
 
 ***HOUSE ANALYSIS***
 ```{r}
-house_candidates <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/2026_GP_houseofdelegatesbydistrict_candidatelist.csv") |> clean_names()
+house_candidates <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/2026_GP_houseofdelegatesbydistrict_candidatelist.csv") |> clean_names() 
 
 
-house_candidates_count <- house_candidates  |> count(contest_run_by_district_name_and_number) |> mutate(
+house_candidates_count <- house_candidates |> filter(candidate_status == "Active") |> count(contest_run_by_district_name_and_number) |> mutate(
     district_num = readr::parse_number(contest_run_by_district_name_and_number),
     district_letter = stringr::str_extract(contest_run_by_district_name_and_number, "[A-Z]")
   ) |> arrange(district_num, district_letter) 
 
 write.csv(house_candidates_count, file ="house_candidates_count.csv") 
+
+house_party_count <- house_candidates |> filter(candidate_status == "Active") |> 
+  mutate(house_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
+  arrange(house_district) |> count(house_district, office_political_party) |>
+  pivot_wider(
+    names_from = office_political_party,
+    values_from = n,
+    values_fill = 0
+  ) 
 
 ```
 
