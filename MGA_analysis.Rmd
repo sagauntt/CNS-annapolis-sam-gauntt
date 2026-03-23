@@ -8,7 +8,7 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
 
-***SENATE ANALYSIS***
+***SENATE ANALYSIS 2026 primary***
 ```{r}
 library(tidyverse) 
 library(janitor) 
@@ -36,7 +36,7 @@ senate_party_count <- senate_candidates |> filter(candidate_status == "Active") 
 ```
 
 
-***HOUSE ANALYSIS***
+***HOUSE ANALYSIS 2026 primary***
 ```{r}
 house_candidates <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/2026_GP_houseofdelegatesbydistrict_candidatelist.csv") |> clean_names() 
 
@@ -58,4 +58,54 @@ house_party_count <- house_candidates |> filter(candidate_status == "Active") |>
   ) 
 
 ```
+
+***SENATE 22 PRIMARY***
+```{r}
+senate_candidates_22 <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/gen_cand_lists_2022_6.csv") |> clean_names()
+
+senate_candidates_count_22 <- senate_candidates_22 |> filter(candidate_status == "Active") |> 
+  mutate(senate_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
+  arrange(senate_district) |> count(senate_district) |> rename(num_candidates = n)
+
+write.csv(senate_candidates_count_22, file ="senate_candidates_count.csv") 
+
+
+#party totals
+
+senate_party_count_22 <- senate_candidates_22 |> filter(candidate_status == "Active") |> 
+  mutate(senate_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
+  arrange(senate_district) |> count(senate_district, office_political_party) |>
+  pivot_wider(
+    names_from = office_political_party,
+    values_from = n,
+    values_fill = 0
+  ) 
+
+```
+
+
+
+***HOUSE 22 PRIMARY***
+```{r}
+house_candidates_22 <- read_csv("~/Documents/GitHub/CNS-annapolis-sam-gauntt/gen_cand_lists_2022_7.csv") |> clean_names() 
+
+
+house_candidates_count_22 <- house_candidates_22 |> filter(candidate_status == "Active") |> count(contest_run_by_district_name_and_number) |> mutate(
+    district_num = readr::parse_number(contest_run_by_district_name_and_number),
+    district_letter = stringr::str_extract(contest_run_by_district_name_and_number, "[A-Z]")
+  ) |> arrange(district_num, district_letter) 
+
+write.csv(house_candidates_count_22, file ="house_candidates_count.csv") 
+
+house_party_count_22 <- house_candidates_22 |> filter(candidate_status == "Active") |> 
+  mutate(house_district = readr::parse_number(contest_run_by_district_name_and_number)) |> 
+  arrange(house_district) |> count(house_district, office_political_party) |>
+  pivot_wider(
+    names_from = office_political_party,
+    values_from = n,
+    values_fill = 0
+  ) 
+
+```
+
 
